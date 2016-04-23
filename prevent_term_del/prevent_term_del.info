@@ -1,0 +1,5 @@
+name = Prevent term deletion
+description = Prevents the deletion of vocabulary term in use
+version = 0.1
+core = 7.x
+package = Custom

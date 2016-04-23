@@ -1,0 +1,5 @@
+name = Manager menu customization
+description = Tailor admin menu options for manager
+version = 0.1
+core = 7.x
+package = Scheduling

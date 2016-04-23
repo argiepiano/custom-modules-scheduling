@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+
+function transfer_student_menu() {
+    $items = array();
+    
+    $items['transfer-students/%node'] = array(
+        'title' => 'Transfer students from node to Line Item',
+        'description' => 'Transfer students from node to Line Item',
+        'access callback' => TRUE,
+        'page arguments' => array(1),
+        'page callback' => '_do_the_thing',
+        'type' => MENU_CALLBACK,
+    );   
+  
+    //$items['transfer_students'] = array(
+    //'title' => 'Transfer student to State Level Audition',
+    //'page callback' => 'drupal_get_form',
+    //'page arguments' => array('transfer_student_forms'),
+    //'access callback' => TRUE,
+    //'description' => 'Form to input the student ID for the student to be transferred',
+    //'type' => MENU_CALLBACK,
+    //'file' => 'transfer_student_forms.inc',
+    //);
+    //
+    return $items;
+}
+
+function _do_the_thing($n) {
+    global $user;
+    $uid = $user->uid;
+    $node_wrapper = entity_metadata_wrapper('node', $n);
+    
+    // abort if this student has already been transferred
+    if ($node_wrapper->field_transferred_to_order->value()) {
+        drupal_get_messages('status');
+        drupal_set_title(t('Add advancing student to cart'));
+        drupal_set_message(t('This student has already been added to cart or transferred to the State Audition.'), 'warning');
+        return l('Return to student search', '/search-advancing-student');
+    } 
+    
+    
+    // See if current user has already started an order
+    
+//    $order_id = commerce_cart_order_id($user->uid);
+
+/*    if (!empty($order_id)) {
+*         // load current order
+*        $order = commerce_order_load($order_id);
+*    } else {
+*        // Create the order and save it to get its ID
+*        $order = commerce_order_new($user->uid, 'cart');
+*        commerce_order_save($order);
+*    }
+ */       
+        
+    // load product specified in the SKU of the line item node
+    $product = commerce_product_load_by_sku($node_wrapper->field_product_sku->value());
+
+    $line_item_type = ($node_wrapper->field_product_sku->value() == 'chamber') ? 'ensemble_registration' : 'registration';
+    
+    $line_item = commerce_product_line_item_new($product, $node_wrapper->field_quantity->value(), NULL, array(), $line_item_type);
+    
+
+    // transfer field contents from node to new line item    
+    $li_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+    $li_fields = $li_wrapper->getPropertyInfo();
+    $node_fields = $node_wrapper->getPropertyInfo();
+    // $output = '';
+    foreach ($node_fields as $key => $content) {
+        if (strstr($key, 'field')) {
+            if (isset($li_fields[$key]) && ($node_wrapper->$key->value())) {
+//                watchdog('transfer', 'About to set field ' . $key);
+                $li_wrapper->$key->set($node_wrapper->$key->value());
+            }
+        }
+    }
+     
+     if ($node_wrapper->field_kmta_teacher->value()){
+         $li_wrapper->field_kmta_teacher->set(TRUE);
+     } else {
+         $li_wrapper->field_kmta_teacher->set(FALSE);
+     }
+     
+     
+
+    // mark LI node as transferred 
+    $node_wrapper->field_transferred_to_order->set(TRUE);
+    $node_wrapper->save();
+//    dpm($node_wrapper->field_transferred_to_order->value());
+    
+
+    $line_item = commerce_cart_product_add($uid, $line_item, FALSE);
+    commerce_cart_order_session_save($line_item->order_id); 
+    
+/*    // Add line item to order and save order
+*    $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+ *   $order_wrapper->commerce_line_items[] = $line_item;
+  *       //    save the line item to get its ID
+ *   commerce_line_item_save($line_item);
+ *   commerce_order_save($order);
+*/    
+    drupal_goto('search-advancing-student');
+
+    return 'hi';
+}

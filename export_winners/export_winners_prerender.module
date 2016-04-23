@@ -1,0 +1,15 @@
+<?php
+
+/*
+ * Implements hook_views_pre_render().
+ *
+ * This function inserts the correct District number into the district field for exporting the district CVS of approved students
+ * It should ONLY be enabled in the District sites, not the State site
+ */
+
+function export_winners_prerender_views_pre_render(&$view) {
+    if ($view->name == 'export_winners' && $view->current_display == 'views_data_export_1') {
+        $view->field['nothing']->options['alter']['text'] = variable_get('tenuto_district');
+        $view->field['nothing']->options['alter']['alter_text'] = 1;
+    }
+}

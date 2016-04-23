@@ -1,0 +1,23 @@
+<?php
+
+
+/*
+ * Implements hook_install()
+ */
+
+function colorme_install() {
+    $color_tmp = array  ('#F5D883','#83F5D7','#D783F5','#3859A7','#A73858','#59A738','#30EA36','#3630E9','#E93630','#E3A0D0');
+    variable_set('colorme_colors', $color_tmp);
+    variable_set('colorme_index', 0);
+    
+}
+
+/*
+ * Implements hook_uninstall()
+ */
+
+function colorme_uninstall() {
+    variable_del('colorme_colors');
+    variable_del('colorme_index');
+    
+}

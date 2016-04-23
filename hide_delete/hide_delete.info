@@ -1,0 +1,4 @@
+name = Hide Delete button
+description = Hide Delete button in node edit/creation
+core = 7.x
+package = Custom

@@ -1,0 +1,85 @@
+<?php
+
+/*
+ * Implements hook_menu().
+ */
+
+function approve_by_id_menu() {
+    $items = array();
+    
+    $items['admin/approve-by-id'] = array (
+        'title' => 'Approve students for State Auditions',
+        'description' => 'Invokes Rules Component to approve students',
+        'access arguments' => array('approve students by id'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('approve_by_id_form'),
+        'type' => MENU_CALLBACK,
+    );
+    
+    return $items; 
+}
+
+/**
+ * Implements hook_permission().
+ */
+function approve_by_id_permission() {
+  return array(
+    'approve students by id' => array(
+      'title' => t('Approve students by ID'),
+      'description' => t('Allows access to the Rules Component that marks students for approval into KMTA State Honors'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_form().
+ */
+
+function approve_by_id_form() {
+    $form = array();
+    
+    $form['li_ids'] = array(
+    '#title' => t('Student IDs'),
+    '#type' => 'textarea',
+    '#description' => t('Enter the Student IDs separated by commas.'),
+    '#required' => TRUE,
+    );
+    
+    $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+    return $form;
+
+}
+
+function approve_by_id_form_validate ($form, &$form_state) {
+    $values = explode(',', $form_state['values']['li_ids']);
+    foreach ($values as $value) {
+        if (!is_numeric($value)) {
+            form_set_error('li_ids', t('Be sure all values are numbers separated by commas.'));
+        } 
+    };
+}
+
+function approve_by_id_form_submit ($form, &$form_state) {
+    $values = explode(',', $form_state['values']['li_ids']);
+    foreach ($values as $id){
+        $line_item = commerce_line_item_load($id);
+        if ($line_item) {
+            $li_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+            if ($li_wrapper->type->value()!='registration' && $li_wrapper->type->value()!='ensemble_registration' ) {
+                drupal_set_message(t('Student ID ' . $id . 'does not exist'), 'warning');
+            } else {
+                $li_wrapper->field_approved_for_state->set(TRUE);
+                $li_wrapper->save();
+                drupal_set_message(t('Student ID '. $id . ' marked as "approved"'));
+            };
+        } else {
+            drupal_set_message(t('Student ID ' . $id . ' does not exist.'), 'warning');
+        };
+    }
+}
+
+

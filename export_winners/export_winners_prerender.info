@@ -1,0 +1,5 @@
+name = Export Winners Prerender
+description = This module inserts the correct District number into the district Custom Text field of the Data Export View for exporting the district CVS of approved students. It should ONLY be enabled in the District sites, not the State site
+core = 7.x
+package = Custom
+dependencies [] = views_data_export

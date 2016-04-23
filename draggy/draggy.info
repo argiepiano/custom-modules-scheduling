@@ -1,0 +1,6 @@
+name = Drag and drop for Not Assigned
+description = Drag and drop functionality for admin/students/not-assigned page
+version = 0.1
+core = 7.x
+package = Scheduling
+

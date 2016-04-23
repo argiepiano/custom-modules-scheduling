@@ -1,0 +1,21 @@
+<?php
+
+/*
+ * Implements hook_form_FORM_ID_alter()
+ */
+
+function modifycheck_form_commerce_cheque_cash_form_alter(&$form, &$form_state, $form_id) {
+    $form['information'] = array(
+    '#markup' => t('Please update the check status. Select "Received" if check has been received.').'<br />'
+        );
+    
+    $form['cheque_date']['#title'] = t('Check date');
+    $form['cheque_date']['#description'] = t('Enter check date here');
+    $form['payee_name']['#description'] = t('Enter check payee name here');
+    $form['reference']['#description'] = t('Enter check reference number here');
+    $form['cheque_status']['#title'] = t('Check status');
+    $form['cheque_status']['#description'] = t('Select check status here');
+    $form['submit']['#value'] = t('Update');
+    
+    
+}

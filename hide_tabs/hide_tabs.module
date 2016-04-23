@@ -1,0 +1,11 @@
+<?php
+
+function hide_tabs_menu_alter (&$items) {
+    $items['taxonomy/term/%taxonomy_term/edit']['type'] = MENU_CALLBACK;
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/list']['type'] = MENU_CALLBACK;
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/edit']['type'] = MENU_CALLBACK;
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/fields']['type'] = MENU_CALLBACK;
+    $items['admin/structure/taxonomy/%taxonomy_vocabulary_machine_name/display']['type'] = MENU_CALLBACK;
+    $items['node/%node/view']['type'] = MENU_CALLBACK;
+    $items['node/%node/edit']['type'] = MENU_CALLBACK;
+}

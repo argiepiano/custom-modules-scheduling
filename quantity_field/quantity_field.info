@@ -1,0 +1,5 @@
+name = Quantity field modifier
+description = Modifies the title of the Quantity Field for a given Commerce Line Item add to cart form
+version = 0.1
+core = 7.x
+package = Custom

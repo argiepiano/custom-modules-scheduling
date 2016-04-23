@@ -1,0 +1,4 @@
+name = Hide Menu Tabs
+description = Hides several menu tabs in taxonomy term creation 
+core = 7.x
+package = Custom

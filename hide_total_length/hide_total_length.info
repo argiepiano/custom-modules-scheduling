@@ -1,0 +1,5 @@
+name = Hide total length field 
+description = Hide total length field in Time Slot edit form
+package = Custom
+core = 7.x
+version = 0.1

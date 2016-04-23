@@ -1,0 +1,5 @@
+name = Tempo update trial
+description = tempo update trial
+core = 7.x
+package = Custom
+version = 1.0

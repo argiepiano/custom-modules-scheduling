@@ -1,0 +1,11 @@
+<?php
+
+function tempotrial_update_7100 (&$sandbox) {
+  drupal_set_message('You need to chill out!', 'warning');
+  dpm($sandbox);
+}
+
+function tempotrial_update_7101 (&$sandbox) {
+  drupal_set_message('You need to CHILL OUT!', 'warning');
+  dpm($sandbox);
+}

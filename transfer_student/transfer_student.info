@@ -1,0 +1,4 @@
+name = Transfer student to cart
+Description = Functionality for transferring student from node to cart
+core = 7.x
+package = Custom

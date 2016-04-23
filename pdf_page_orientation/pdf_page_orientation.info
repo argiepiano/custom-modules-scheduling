@@ -1,0 +1,5 @@
+name = Dompdf/Print change page orientation
+description = Changes page orientation of PDF when used with Print module and dompdf
+version = 0.1
+core = 7.x
+package = Scheduling

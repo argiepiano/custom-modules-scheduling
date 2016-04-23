@@ -1,0 +1,6 @@
+name = Modify check form
+description = Modifies check update form 
+version = 0.1
+core = 7.x
+package = Custom
+dependencies[] = commerce_cheque

@@ -1,0 +1,7 @@
+<?php
+function hide_weight_fieldset_form_time_slot_node_form_alter (&$form, &$form_state, $form_id) {
+
+  
+  unset ($form['weight']);	
+  
+  }

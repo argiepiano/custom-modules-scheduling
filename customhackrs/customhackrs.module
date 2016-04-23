@@ -1,0 +1,60 @@
+<?php
+/**
+* Implements hook_inline_entity_form_table_fields_alter().
+* This hack was created to change the columns shown when editing orders
+* 
+*/
+function customhackrs_inline_entity_form_table_fields_alter(&$fields, $context) {
+    // Make sure its the right bundle
+    
+    
+    $is_registration= FALSE;
+    foreach ($context['allowed_bundles'] as $bundle) {
+      if ($bundle=='registration' || $bundle=='ensemble-registration') {
+        $is_registration = TRUE;
+      }
+    }
+    if ($is_registration) {
+ 
+//      dpm($fields);
+//      dpm($context);
+      unset($fields['commerce_unit_price']);
+      unset($fields['quantity']);
+      unset($fields['line_item_label']);
+      
+      $fields['type'] = array(
+        'type' => 'property',
+        'label' => t('Type'),
+        'weight' => -2,
+      );
+
+      $fields['line_item_id'] = array(                   
+        'type' => 'property',
+        'label' => t('Student ID'),
+        'weight' => 0,
+      );
+
+      $fields['field_student_name'] = array(                   
+        'type' => 'field',
+        'label' => t('Student name'),
+        'weight' => 1,
+        
+      );
+//      $fields['field_instrument'] = array(                   
+//        'type' => 'field',
+//        'label' => t('Instrument'),
+//        'weight' => 2,
+        
+//      );
+       $fields['field_teacher_name'] = array(                   
+        'type' => 'field',
+        'label' => t('Teacher name'),
+        'weight' => 3,
+        
+      );
+    }
+}
+//
+//function customhackrs_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
+//  dpm($entity_form);
+//}

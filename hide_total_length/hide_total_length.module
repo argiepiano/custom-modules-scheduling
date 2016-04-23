@@ -1,0 +1,13 @@
+<?php
+
+function hide_total_length_form_time_slot_node_form_alter(&$form, &$form_state, $form_id) {
+    if (isset($_REQUEST['edit'])) {
+        $request = (array) $_REQUEST['edit'];
+        if ($request['field_student_name'][LANGUAGE_NONE][0]['value'] != 'Break') {
+            $form['#group_children']['field_total_length'] = 'group_hidden_in_form';
+        } 
+    }
+    
+
+
+}

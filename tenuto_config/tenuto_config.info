@@ -1,0 +1,5 @@
+name = Tenuto registrations configurations
+description = General config for KMTA Tenuto Registration System
+core = 7.x
+package = Custom
+dependencies[] = token

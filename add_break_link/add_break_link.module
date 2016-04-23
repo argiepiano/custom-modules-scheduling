@@ -1,0 +1,17 @@
+<?php
+function add_break_link_views_bulk_operations_form_alter (&$form, &$form_state, $vbo) {
+  
+ if ($form['#id'] == 'views-form-tempo-room-no-rearrange-page') {
+     $form['select']['addbreak_markup'] = array (
+    '#type' => 'markup',
+    '#markup' => '&nbsp; | &nbsp; <a href="../node/add/break" style="font-family: Helvetica, Arial, sans-serif">+ Add a break</a>'
+    );
+  
+  
+ }
+ 
+ 
+    
+}
+
+

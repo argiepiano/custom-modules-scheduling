@@ -1,0 +1,20 @@
+<?php
+function quantity_field_form_commerce_cart_add_to_cart_form_7_8_9_10_11_12_alter (&$form, &$form_state, $form_id) {
+ 
+
+
+  $form['quantity']['#title'] = 'Number of students in ensemble';
+  $form['quantity']['#description'] = 'Enter the total number of students in this ensemble';
+  
+  
+  }
+  
+function quantity_field_form_commerce_cart_add_to_cart_form_15_alter (&$form, &$form_state, $form_id) {
+ 
+
+
+  $form['quantity']['#title'] = 'Number of students in ensemble';
+  $form['quantity']['#description'] = 'Enter the total number of students in this ensemble';
+  
+ }  
+  

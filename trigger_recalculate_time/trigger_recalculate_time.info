@@ -1,0 +1,6 @@
+name = Trigger recalculate time
+description = Trigger time recalculation after saving rearranged time slots
+version = 0.1
+core = 7.x
+package = Custom
+dependencies[] = weight

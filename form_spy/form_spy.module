@@ -1,0 +1,32 @@
+<?php
+function form_spy_form_alter (&$form, &$form_state, $form_id) {
+ 
+  dpm($form);
+  dpm($form_state);
+  dpm($form_id);
+
+  }
+  
+//function form_spy_menu(){
+//  $items['admin/commerce/orders/%commerce_order/caca'] = array(
+//    'title' => 'Your Title',
+//    'page callback' => 'your_callback_for_the_operation',
+//    'page arguments' => array(3),
+//    'access callback' => TRUE,
+//    'type' => MENU_LOCAL_TASK,
+//    'weight' => 30,
+//    'context' => MENU_CONTEXT_INLINE,
+//);
+//  
+//  return $items;
+//}
+
+
+
+//function form_spy_entity_presave($entity, $type) {
+//  dpm($entity);
+//  dpm($type);
+//  $entity->field_textfield[LANGUAGE_NONE][0]['value'] = 'preprepre';
+//  
+//} 
+//  

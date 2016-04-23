@@ -1,0 +1,13 @@
+<?php
+function pdf_page_orientation_print_pdf_page_alter(&$paper_size, &$page_orientation) {
+    
+    
+    
+    if(current_path() == 'admin/students/certificates') {
+          
+        $page_orientation = 'landscape';
+    
+    
+    }
+    
+}

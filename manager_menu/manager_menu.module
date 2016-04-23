@@ -1,0 +1,18 @@
+<?php
+function manager_menu_admin_menu_output_alter(&$content) {
+
+global $user;  
+
+if (in_array('manager', $user->roles)) {
+  
+  dpm($content);
+/*  unset($content['menu']['admin/content']); */
+  unset($content['menu']['admin/structure']);
+  unset($content['menu']['admin/config']);
+  unset($content['menu']['admin/help']);
+ 
+  
+  
+}
+  
+}

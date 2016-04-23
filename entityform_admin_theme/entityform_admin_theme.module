@@ -1,0 +1,11 @@
+<?php
+
+/** 
+ * Implements hook_custom_theme
+ */
+
+function entityform_admin_theme_custom_theme() {
+  if (arg(0) == 'eform') {
+    return 'sevencsmta';
+  }
+}

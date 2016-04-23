@@ -1,0 +1,6 @@
+name = Form spy
+description = Spy a form
+version = 0.1
+core = 7.x
+package = Custom
+dependencies[] = devel

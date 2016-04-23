@@ -1,0 +1,6 @@
+name = Color rooms
+description = Automatically colors terms in room vocabulary
+core = 7.x
+package = Custom
+dependencies[] = colors
+dependency[] = fullcalendar

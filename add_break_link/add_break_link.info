@@ -1,0 +1,5 @@
+name = Add break link
+description = Adds an "add a break" link to VBO's Operations box
+version = 0.1
+core = 7.x
+package = Custom

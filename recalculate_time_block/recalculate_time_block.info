@@ -1,0 +1,5 @@
+name = Recalculate time block times
+description = Recalculates all time slot times in a given time block. Format example.com/recalculate-time-block/[nid]
+package = Custom
+dependencies[] = weight
+core = 7.x

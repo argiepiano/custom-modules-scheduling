@@ -1,0 +1,28 @@
+<?php
+function add_recalculate_link_views_bulk_operations_form_alter (&$form, &$form_state, $vbo) {
+  
+ if ($form['#id'] == 'views-form-tempo-room-no-rearrange-page') {
+     $form['select']['addrecalculate_markup'] = array (
+    '#type' => 'markup',
+    '#markup' => '&nbsp; &nbsp; <a href="../students/recalculate" style="font-family: Helvetica, Arial, sans-serif">Recalculate times</a>'
+    );
+ }
+    
+}
+
+function add_recalculate_link_menu() {
+  $items = array();
+  $items['students/recalculate'] = array(
+    'title' => t('Recalculate'),
+    'page callback' => 'recalculate_link_callback',
+    'access arguments' => array('access content'),
+    'description' => t('Recalculate times'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function recalculate_link_callback() {
+  rules_invoke_component('rules_recalculate_time_blocks_entry');
+  drupal_goto('students/time-blocks');
+}

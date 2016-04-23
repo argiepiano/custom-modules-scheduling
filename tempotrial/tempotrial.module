@@ -1,0 +1,10 @@
+<?php
+function tempotrial_form_alter (&$form, &$form_state, $vbo) {
+  
+ dpm($form);
+ 
+ 
+    
+}
+
+

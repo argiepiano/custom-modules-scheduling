@@ -1,0 +1,5 @@
+name = Rearrange VBO submit
+description = Places VBO submit button at the bottom for selected VBO forms
+core = 7.x
+package = Custom
+dependencies[] = views_bulk_operations

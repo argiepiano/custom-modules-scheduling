@@ -1,0 +1,6 @@
+name = Collapsible VBO Operations Fieldset
+description = Makes the VBO Operations collapsible
+version = 0.1
+core = 7.x
+package = Scheduling
+dependencies[] = views_bulk_operations

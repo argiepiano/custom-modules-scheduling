@@ -1,0 +1,4 @@
+name = Approve students by ID
+description = Triggers the component "Approve students for advancing with IDs" to mark students to move the State finals
+core = 7.x
+package = Custom

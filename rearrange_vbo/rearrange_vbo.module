@@ -1,0 +1,24 @@
+<?php
+
+/*
+* Implements hook_form_FORM_ID_alter().
+*/
+
+function rearrange_vbo_form_views_form_search_advancing_student_page_alter (&$form, &$form_state) {
+    $form['output']['#weight'] = -99; //send output to the top
+}
+
+/*
+function rearrange_vbo_form_views_form_students_li_not_assigned_alter (&$form, &$form_state) {
+    $form['output']['#weight'] = -99; //send output to the top
+}
+
+function rearrange_vbo_form_views_form_line_items_for_admin_page_1_alter(&$form, &$form_state) {
+    $form['output']['#weight'] = -99; //send output to the top
+}
+
+function rearrange_vbo_form_views_form_export_winners_page_1_alter (&$form, &$form_state) {
+    $form['output']['#weight'] = -99; //send output to the top
+}
+*/
+

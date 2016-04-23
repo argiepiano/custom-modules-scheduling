@@ -1,0 +1,5 @@
+; $Id $
+name = My Custom Inline Hack
+package = Custom
+description = A hack to show other fields in the Inline Entity Form table
+core = 7.x

@@ -1,0 +1,29 @@
+<?php
+
+
+function prevent_term_del_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
+
+
+      if (isset($form['delete'])) {
+
+        // Getting the term id.
+        $tid = $form['#term']->tid;
+
+        // Limiting the query to 30 to save resources when loading the nodes later on.
+        $limit = 1;
+
+        // Getting node ids referencing this term and setting a limit.
+        $result = taxonomy_select_nodes($tid, FALSE, $limit);
+
+        if (count($result) > 0) {
+          $markup = t('This room contains Time Blocks and cannot be deleted. Please remove the Time Blocks first by going to the Time Blocks menu');
+
+          // Using the render array's markup key to display our warning message.
+          $form['description']['#markup'] = $markup;
+
+          // Removing the 'delete' button from the form.
+          $form['actions']['submit']['#access'] = FALSE;
+          // $form['actions']['submit']['#disabled'] = TRUE; // Disables the button instead of removing it.
+        }
+      }
+}

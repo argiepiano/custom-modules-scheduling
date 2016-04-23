@@ -1,0 +1,4 @@
+name = Entityform Admin Theme 
+description = Use admin theme for entityforms
+packages = Custom
+core = 7.x

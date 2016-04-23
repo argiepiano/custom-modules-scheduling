@@ -1,0 +1,43 @@
+<?php
+
+/**
+* Implements hook_init().
+*/
+//function draggy_init() {
+//  // The path to the draggy module.
+//  $path = drupal_get_path('module', 'draggy');
+//  // Include file only for node pages.
+//  if (arg(0) == 'admin' && (arg(2) == 'not-assigned' || arg(2) == 'time-block-display')) {
+////    drupal_set_message('About to add libraries', 'status');
+//    drupal_add_js($path . '/js/draggy.js');
+//    drupal_add_library('system', 'ui.draggable');
+//    drupal_add_library('system', 'ui.droppable');
+//    drupal_add_library('system', 'jquery.cookie');
+////    dpm(drupal_get_library('system'));
+//  }
+//}
+
+/*
+ * Implementation of hook_menu()
+ */
+function draggy_menu(){
+    $items = array();
+    $items['draggy/%/%'] = array(
+        'title' => t('Draggy Module'),
+        'page callback' => 'draggy_function_enter',
+        'page arguments' => array(1,2),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+    return $items;
+}
+
+function draggy_function_enter($a1, $a2) {
+#  drupal_set_message($a1, "status");
+#  drupal_set_message($a2, "status"); 
+  $node=node_load($a1);
+  $line_i = commerce_line_item_load ($a2);
+  $destination = drupal_get_destination();
+  rules_invoke_component('rules_create_time_slot_by_dragging', $line_i, $node);
+  drupal_goto($destination);
+}

@@ -1,0 +1,4 @@
+name = Inherit Teacher Information
+Description = Prepopulates fields in registration line item to inherit last teacher info via cookies
+core = 7.x
+package = Custom

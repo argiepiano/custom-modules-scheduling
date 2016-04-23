@@ -1,0 +1,22 @@
+<?php
+
+/*
+ * Implements hook_form_FORM_ID_alter()
+ */
+
+function teachercode_form_views_form_line_items_for_admin_page_1_alter(&$form, &$form_state, $form_id) {
+	if (isset($form_state['input']['views_bulk_operations']) && $form_state['clicked_button']['#operation_id'] == 'rules_component::rules_assign_teacher_code') {
+		hide($form['parameter']['teacher_code']['settings']['help']['token']);
+//		dpm($form_state);
+		$form['actions']['submit']['#validate'][] = 'teachercode_validate';
+		$form['parameter']['teacher_code']['settings']['teacher_code']['#description'] = 'Follow the format D-XXX, replacing "D" with your District number, and XXX with any letters or numbers. Use "0" for State level. Example: 3-A = District 3, teacher code A.';
+	}
+}
+function teachercode_validate($form, &$form_state) {
+	$subject = $form_state['input']['parameter']['teacher_code']['settings']['teacher_code'];
+	$pattern = '/[0-9]-\w+/';
+	if (!preg_match($pattern, $subject)) {
+		form_set_error('teacher_code', 'Follow the format D-XXX, replacing "D" with your District number, and XXX with any letters or numbers. Example: 3-A = District 3, teacher code A.');
+	}
+
+}

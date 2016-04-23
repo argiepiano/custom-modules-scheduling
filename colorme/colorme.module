@@ -1,0 +1,50 @@
+<?php
+
+/*
+ * Implements hook_menu()
+ */
+
+function colorme_menu() {
+    $items = array();
+    $items['colorme/%'] = array(
+        'title' => 'Color room terms',
+        'description' => 'Automatically colors terms in rooms vocabulary',
+        'page callback' => 'add_color',
+        'page arguments' => array(1),
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('administer users'),                     
+    );
+    
+    return $items;
+ }
+ 
+function add_color($tid) {
+    
+    $all_colors = variable_get('colorme_colors', array('#33ccff'));
+    $color_index = variable_get('colorme_index',0);
+    
+    $next_color = $all_colors[$color_index];
+    
+    $color_index = $color_index + 1;
+    if ($color_index >= count($all_colors)) {
+        $color_index = 0;
+    }
+    variable_set('colorme_index', $color_index);
+    
+    $wrapper = entity_metadata_wrapper('taxonomy_term',$tid);
+    
+    $wrapper->field_colorhex = $next_color;
+    
+    $wrapper->save();
+    
+    $colors = array(
+        'background' => $next_color,
+        'border' => $next_color,
+        'text' => '#ffffff');
+
+    
+    colors_set_colors('colors_taxonomy_term_' . $tid, $colors, 'taxonomy_term');
+    colors_css_clear();
+
+    return 'hello';
+}

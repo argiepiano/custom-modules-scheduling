@@ -1,0 +1,4 @@
+name = FCMTA message icon block
+description = Creates a inbox icon block that gets illuminated when there are unread messages
+core = 7.x
+package = Custom

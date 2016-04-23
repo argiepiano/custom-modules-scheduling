@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function tenuto_config_install() {
+  // Set default variables.
+  variable_set('tenuto_district', 'State');
+  variable_set('tenuto_mail', 'acremaschi@tenutoweb.com');
+  variable_set('tenuto_name', 'Alejandro Cremaschi');
+  variable_set('tenuto_location', 'Undetermined');
+  variable_set('tenuto_date', 'October 1, 2015');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+
+function tenuto_config_uninstall() {
+    variable_del('tenuto_district');
+    variable_del('tenuto_mail');
+    variable_del('tenuto_name');
+    variable_del('tenuto_location');
+    variable_del('tenuto_location');
+}

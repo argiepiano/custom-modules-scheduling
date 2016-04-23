@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Implements hook_views_bulk_operations_form_alter
+ * Makes VBO fieldset collapsible and changes the title of the fieldset
+ * Created: Alejandro Cremaschi Dec 12, 2014
+ */
+
+function collapsible_vbo_operations_views_bulk_operations_form_alter(&$form, &$form_state, $vbo)
+{
+  
+  if ($form_state['step'] == 'views_form_views_form') {
+    $form['select']['#collapsible'] = TRUE;
+    $form['select']['#collapsed'] = TRUE;
+    $form['select']['#title'] = t('Bulk Operations');
+  }
+}

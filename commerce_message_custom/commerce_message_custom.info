@@ -1,0 +1,5 @@
+; $Id $
+name = Commerce Message Custom
+package = Custom
+description = Allows for message sent to admin to render !order-summary. Taken from https://drupalcommerce.org/questions/10096/order-summary-email
+core = 7.x

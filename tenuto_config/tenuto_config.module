@@ -1,0 +1,156 @@
+<?php
+
+/*
+ *  Implements hook_menu().
+ */
+
+ function tenuto_config_menu() {
+    $items = array();
+    $items['admin/config/tenuto'] = array (
+        'title' => 'Tenuto Configurations',
+        'description' => 'Configure KMTA Tenuto System',
+        'access arguments' => array('administer tenuto'),
+    );
+    
+    $items['admin/config/tenuto/manage'] = array(
+    'title' => 'KMTA Tenuto settings',
+    'description' => 'Manage KMTA Tenuto settings and configurations.',
+    'access arguments' => array('administer tenuto'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tenuto_config_settings_form'),
+    );
+    return $items;
+ }
+ 
+function tenuto_config_settings_form($form, &$form_state) {
+    $form = array();
+    
+    $form['tenuto_district'] = array(
+        '#title' => t('District name'),
+        '#description' => t('Enter the District name. Enter the word "State" for state site'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('tenuto_district'),
+        '#required' => TRUE,
+    );
+    
+    $form['tenuto_name'] = array(
+        '#title' => t('Name of district manager'),
+        '#description' => t('Enter the name of the district manager.'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('tenuto_name'),
+        '#required' => TRUE,
+    );
+
+    $form['tenuto_mail'] = array(
+        '#title' => t('Email of district manager'),
+        '#description' => t('Enter the email of the district manager.'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('tenuto_mail'),
+        '#required' => TRUE,
+    );    
+    $form['tenuto_date'] = array(
+        '#title' => t('Date of district audition'),
+        '#description' => t('Enter the date of the district audition.'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('tenuto_date'),
+        '#required' => TRUE,
+    ); 
+    $form['tenuto_location'] = array(
+        '#title' => t('Location of district audition'),
+        '#description' => t('Enter the location of the district audition.'),
+        '#type' => 'textarea',
+        '#default_value' => variable_get('tenuto_location'),
+        '#required' => TRUE,
+    );
+    
+    return system_settings_form($form);
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tenuto_config_permission() {
+  return array(
+    'administer tenuto' => array(
+      'title' => t('Administer KMTA Tenuto configurations'),
+      'description' => t('Perform administrative tasks on KMTA Tenuto functionality'),
+    ),
+  );
+}
+
+/**
+ * Implements  hook_token_info
+ */
+function tenuto_config_token_info() {
+
+   $info = array();
+
+    // // Define a new token type.
+    //$info['types']['tenuto-variables'] = array(
+    //    'name' => t('KMTA Tenuto Variables'),
+    //    'description' => t('A token type for KMTA Tenuto variables.'),
+    //);
+   
+  // Define any new tokens.
+    $info['tokens']['site']['tenuto-district'] = array(
+        'name' => t('District name'),
+        'description' => t('Token replacement for the KMTA district name variable.'),
+    );
+    $info['tokens']['site']['tenuto-name'] = array(
+        'name' => t('Name of district manager'),
+        'description' => t('Token replacement for the name of the KMTA district manager variable.'),
+    );
+        
+    $info['tokens']['site']['tenuto-mail'] = array(
+        'name' => t('Email of district manager'),
+        'description' => t('Token replacement for the email of the KMTA district manager variable.'),
+    );
+    $info['tokens']['site']['tenuto-location'] = array(
+        'name' => t('Location of district audition'),
+        'description' => t('Location of the KMTA district audition.'),
+    );
+    $info['tokens']['site']['tenuto-date'] = array(
+        'name' => t('Date of district audition'),
+        'description' => t('Date of the KMTA district audition.'),
+    );
+  return $info;
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function tenuto_config_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+
+  if ($type == 'site') {
+    // Loop through the available tokens.
+    foreach ($tokens as $name => $original) {
+      // Find our custom tokens by name.
+      switch ($name) {
+        case 'tenuto-district':
+          // Work out the value of our token.
+          $value = variable_get('tenuto_district');
+          $replacements[$original] = $value;
+          break;
+        case 'tenuto-name':
+            $value = variable_get('tenuto_name');
+            $replacements[$original] = $value;
+            break;
+        case 'tenuto-mail':
+            $value = variable_get('tenuto_mail');
+            $replacements[$original] = $value;
+            break;
+        case 'tenuto-location':
+            $value = variable_get('tenuto_location');
+            $replacements[$original] = $value;
+            break;
+        case 'tenuto-date':
+            $value = variable_get('tenuto_date');
+            $replacements[$original] = $value;
+            break;
+      }
+    }
+  }
+  return $replacements;
+}
+

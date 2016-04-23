@@ -1,0 +1,177 @@
+<?php
+
+/*
+ * Implements hook_menu().
+ */
+
+function badges_menu() {
+  $items['badges'] = array(
+    'page callback' => 'badges_entry',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/*
+ * Entry point for printing badges
+ */
+function badges_entry(){
+  //  get all the registrants (entityform submissions)
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'entityform')
+        ->entityCondition('bundle', 'registrant');
+  $result = $query->execute();
+  if (!$result) {
+    drupal_set_message('You can\'t print any badges because there are no registrants in the system', 'warning');
+    drupal_goto('/home');
+  }
+  // get all entityform ids for all registrants
+  $registrant_ids = array_keys($result['entityform']);
+  $registrants = reg_info_load($registrant_ids);
+  $pdf = do_the_pdf($registrants);
+  header('Content-Type: application/pdf');
+  header('Content-Disposition: inline; filename="badgesCSMTA.pdf"');
+  echo $pdf;
+  flush();
+  return NULL;  
+}
+
+function do_the_pdf($registrants) {
+  // generate the PDF
+  require_once('sites/all/libraries/tcpdf/tcpdf.php');
+  // initiate PDF
+  $pdf = new TCPDF('P', 'mm');
+  $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+  $pdf->SetAutoPageBreak(true, 20);
+  $pdf->setFontSubsetting(false);
+  $pdf->setPrintHeader(false);
+  $pdf->setPrintFooter(false);
+
+  // define variables for positioning
+  $current_y = 29;
+  $current_x = 7;
+  $label_width = 101;
+  $label_height = 76;
+  $x_position = array (7, 108);
+  $y_position = array (29, 105, 181);
+  $x_index = 0;
+  $y_index = 0;
+
+  // add a page
+  $pdf->AddPage('P', 'LETTER');
+
+  foreach ($registrants as $index => $content){
+    // dpm($content);
+    $html1 = '<span style="font-size:24pt;font-weight:bold;">' . $content['nick'] .'</span>';
+    $html2 = '<strong>' . $content['name'] . '</strong>';
+    $html3 = $content['la1'] . '<br>' . $content['la2'] . '<br>' . $content['la3'];
+    
+    $pdf->Image(drupal_get_path('module', 'badges') . '/bannerbigletters.jpg',$current_x, $current_y, 100, 16.6);
+    $pdf->SetXY($current_x, $current_y+20);
+    $pdf->SetFont('helvetica', 'B', 22);
+    $pdf->Cell(100, 0, $content['nick'],0,1,'C');
+    $pdf->SetXY($current_x, $current_y+33);
+    $pdf->SetFont('helvetica','', 12);
+    $pdf->Cell(100, 0, $content['name'],0,1,'C');
+    if(!empty($content['la1'])) {
+      $pdf->SetXY($current_x, $current_y+43);
+      $pdf->Cell(100, 0, $content['la1'],0,1,'C');
+    }
+    if(!empty($content['la2'])) {
+      $pdf->SetXY($current_x, $current_y+49);
+      $pdf->Cell(100, 0, $content['la2'],0,1,'C');
+    }
+    if(!empty($content['la3'])) {     
+      $pdf->SetXY($current_x, $current_y+55);
+      $pdf->Cell(100, 0, $content['la3'],0,1,'C');
+    }
+    if ($content['reg_type']){
+      $pdf->SetXY($current_x, $current_y+62);
+      $pdf->SetFontSize(14);
+      $pdf->Cell(100, 0, $content['reg_type'],1,1,'C');
+    }
+    
+    if (++$x_index == 2 ) {
+      $x_index = 0; 
+      if (++$y_index > 2) {
+        $y_index = 0;
+        $pdf->AddPage();
+      }
+    } 
+      
+    $current_x = $x_position[$x_index];
+    $current_y = $y_position[$y_index];
+  
+  }
+  return $pdf->Output('', 'S');
+}
+
+/*
+ * Loads all information for registrant
+ * @param array $registrant_ids An array of entityform submission IDs
+ *
+ * @return array An array of registrant information, indexed 
+ *  The returned array contains an index as the first key, and the following keys as the second:
+ *  'nick' = Nickname
+ *  'name' = Full name including prefix and certification
+ *  'la1' = Local association 1
+ *  'la2' = Local association 2
+ *  'la3' = Local association 3
+ *  'reg_type' = Registration type description (used for one day registration and first-time attendee)
+ *
+ */
+
+function reg_info_load($registrant_ids) {
+  
+  $registrant_info = array();
+  $i =0;
+  //get array of local associations
+  $all_fields = field_info_fields();
+  $la_values= list_allowed_values($all_fields['field_local_association']);
+  
+  foreach($registrant_ids as $rid) {
+    // we get the line items of bundle 'registration' or 'one_day_registration' for each of the registrants  
+    $query = new EntityFieldQuery();
+    $query-> entityCondition('entity_type', 'commerce_line_item')
+          ->entityCondition('bundle', array('registration','one_day_registration'), 'IN')
+          ->fieldCondition('field_registrant_ref', 'target_id', $rid, "=");
+    $result = $query->execute();
+    if ($result) {
+      // load the line item
+      $li = commerce_line_item_load(key($result['commerce_line_item']));
+      // load the entityform submission with information for the registrant 
+      $registrant = entity_load('entityform', array($rid));
+      //populate the arrays
+      $registrant_info[$i]['nick'] = $registrant[$rid]->field_name_for_badge['und'][0]['value'];
+      $registrant_info[$i]['la1'] = (isset($registrant[$rid]->field_local_association['und'][0]['value']) ?
+                                     $la_values[$registrant[$rid]->field_local_association['und'][0]['value']] :
+                                     '' );
+      $registrant_info[$i]['la2'] = (isset($registrant[$rid]->field_second_association['und'][0]['value']) ?
+                                     $la_values[$registrant[$rid]->field_second_association['und'][0]['value']] :
+                                     '' );
+      $registrant_info[$i]['la3'] = (isset($registrant[$rid]->field_third_association['und'][0]['value']) ?
+                                     $la_values[$registrant[$rid]->field_third_association['und'][0]['value']] :
+                                     '');
+      $prefix =  (isset($registrant[$rid]->field_prefix['und'][0]['value']) ?
+                  $registrant[$rid]->field_prefix['und'][0]['value'] . ' ' :
+                  '');
+      $cert = (isset($registrant[$rid]->field_certification['und'][0]['value']) ?
+               ', ' . $registrant[$rid]->field_certification['und'][0]['value'] :
+               '' );
+      $registrant_info[$i]['name'] = $prefix . $registrant[$rid]->field_first_name['und'][0]['value'] . ' ' . $registrant[$rid]->field_last_name['und'][0]['value'] . $cert;
+      $registrant_info[$i]['reg_type'] = '';
+      // Registration type
+      switch ($li->commerce_product[LANGUAGE_NONE][0]['product_id']) {
+        case 3:
+          $registrant_info[$i]['reg_type'] = 'First-time attendee'; 
+          break;
+        case 14:
+          $registrant_info[$i]['reg_type'] = 'One day registration: ' . $li->field_attendance_day[LANGUAGE_NONE][0]['value']; 
+          break;
+      }
+      $i++;
+    }
+  }
+  return $registrant_info;
+}

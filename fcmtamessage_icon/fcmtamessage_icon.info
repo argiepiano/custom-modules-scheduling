@@ -1,0 +1,4 @@
+name = FCMTA message icon
+description = Turns on FCMTA message icon
+core = 7.x
+package = Custom

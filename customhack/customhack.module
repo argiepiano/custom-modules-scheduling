@@ -1,0 +1,45 @@
+<?php
+/**
+* Implements hook_inline_entity_form_table_fields_alter().
+* This hack was created to change the columns shown when editing orders
+* 
+*/
+function customhack_inline_entity_form_table_fields_alter(&$fields, $context) {
+    // Make sure there's a stock field on each of the allowed product types.
+    
+  
+    
+    $is_concerto_registration= FALSE;
+    foreach ($context['allowed_bundles'] as $bundle) {
+      if ($bundle=='concerto_competition_registratio') {
+        $is_concerto_registration = TRUE;
+      }
+    }
+    if ($is_concerto_registration) {
+ 
+    
+      unset($fields['commerce_unit_price']);
+      unset($fields['quantity']);
+      
+
+      $fields['field_student_name'] = array(                   
+        'type' => 'field',
+        'label' => t('Student name'),
+        'weight' => 1,
+        
+      );
+      $fields['field_instrument'] = array(                   
+        'type' => 'field',
+        'label' => t('Instrument'),
+        'weight' => 2,
+        
+      );
+       $fields['field_teacher_name'] = array(                   
+        'type' => 'field',
+        'label' => t('Teacher name'),
+        'weight' => 3,
+        
+      );
+    }
+}
+?>

@@ -1,0 +1,6 @@
+name = Hide weight fieldset
+description = Hide weight fieldset in Time Slot node creation
+version = 0.1
+core = 7.x
+package = Scheduling
+dependencies[] = weight

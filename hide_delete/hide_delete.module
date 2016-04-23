@@ -1,0 +1,13 @@
+<?php
+
+/*
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Disable Delete button for node edits
+ * 
+ */
+
+function hide_delete_form_time_block_node_form_alter(&$form, &$form_state) {
+    $form['actions']['delete']['#access'] = FALSE;
+}
+ 

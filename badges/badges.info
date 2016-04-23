@@ -1,0 +1,4 @@
+name = Print conference badges
+description = Print conference badges
+package = Custom
+core = 7.x

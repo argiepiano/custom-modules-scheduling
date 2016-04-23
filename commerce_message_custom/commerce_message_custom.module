@@ -1,0 +1,25 @@
+<?php
+/**
+ * Implements hook_message_presave().
+ *
+ * We cannot use a token to show the order-summary, since both Token and
+ * Entity API modules invoke token_generate() which results with an array
+ * instead of a string with the replacement text.
+ *
+ * Instead, upon saving the message for the first time we inject an
+ * argument with a callback, that will return the order summary.
+ *
+ * @link http://drupal.org/node/1272560
+ */
+function commerce_message_custom_message_presave($message) {
+  if (!empty($message->mid) || $message->type != 'commerce_order_order_confirmation_for_admins' ) {
+    return;
+  }
+
+  $message->arguments['!order-summary'] = array(
+    'callback' => 'commerce_message_order_summary',
+    'pass message' => TRUE,
+  );
+}
+
+?>

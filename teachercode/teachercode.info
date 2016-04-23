@@ -1,0 +1,5 @@
+name = Teacher code form
+description = Hides unnecessary elements in the teacher code VBO entry form
+core = 7.x
+package = Custom
+dependencies[] = views_bulk_operations

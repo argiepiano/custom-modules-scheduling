@@ -1,0 +1,131 @@
+<?php
+
+function inherit_teacher_form_alter(&$form, &$form_state, $form_id) {
+
+    if ($form_id == 'commerce_cart_add_to_cart_form_14' || $form_id == 'commerce_cart_add_to_cart_form_15') {
+
+        //Attach js for selecting the content of the text fields
+        $form['#attached']['js'] = array(
+            drupal_get_path('module', 'inherit_teacher') . '/inherit_teacher.js',
+        );
+        
+        // Show Instrument for Plan D
+        $form['line_item_fields']['field_instrument']['und']['#states'] = array(
+            'visible' => array(
+                array(
+                    array('[name="line_item_fields[field_level][und]"]' => array('value' => 'Plan D')),
+                    array('[name="line_item_fields[field_level][und]"]' => array('value' => 'Strings Plan')),
+                ),
+            ),
+            'required' => array(
+                array(
+                    array('[name="line_item_fields[field_level][und]"]' => array('value' => 'Plan D')),
+                    array('[name="line_item_fields[field_level][und]"]' => array('value' => 'Strings Plan')),
+                ),
+            ),
+
+        );
+        
+        // Make piece 2 optional for plan D      
+        
+        $form['line_item_fields']['field_piece_2'][LANGUAGE_NONE][0]['value']['#states'] = array(
+            'optional' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Plan D'),
+            ),
+        );
+        
+        $form['line_item_fields']['field_composer_2'][LANGUAGE_NONE]['#states'] = array(
+            'optional' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Plan D'),
+            ),
+        );
+           
+        $form['line_item_fields']['field_length_2'][LANGUAGE_NONE][0]['value']['#states'] = array(
+            'optional' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Plan D'),
+            ),
+        ); 
+        
+        // Make piece 3 required for Piano Plan B
+        
+        $form['line_item_fields']['field_piece_3'][LANGUAGE_NONE][0]['value']['#states'] = array(
+            'required' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Piano Plan B'),
+            ),
+        );
+        
+        $form['line_item_fields']['field_composer_3'][LANGUAGE_NONE]['#states'] = array(
+            'required' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Piano Plan B'),
+            ),
+        );
+           
+        $form['line_item_fields']['field_length_3'][LANGUAGE_NONE][0]['value']['#states'] = array(
+            'required' => array(
+                '[name="line_item_fields[field_level][und]"]' => array('value' => 'Piano Plan B'),
+            ),
+        );                
+        
+        // Show instruments for non-duet
+        
+        $form['line_item_fields']['field_ensemble_instruments'][LANGUAGE_NONE][0]['value']['#states'] = array(
+            'visible' => array(
+                '[name="line_item_fields[field_duet][und]"]' => array('checked' => FALSE),
+            ),
+        );
+        
+        // Prepopulate teacher info
+        
+        if (!empty($_COOKIE['Drupal_visitor_name'])) {
+            $form['line_item_fields']['field_teacher_name'][LANGUAGE_NONE][0]['value']['#default_value'] = $_COOKIE['Drupal_visitor_name'];
+        }
+        
+        if (!empty($_COOKIE['Drupal_visitor_email'])) {
+            $form['line_item_fields']['field_teacher_email'][LANGUAGE_NONE][0]['email']['#default_value'] = $_COOKIE['Drupal_visitor_email'];
+        }
+        
+        if (!empty($_COOKIE['Drupal_visitor_phone'])) {
+            $form['line_item_fields']['field_teacher_phone'][LANGUAGE_NONE][0]['value']['#default_value'] = $_COOKIE['Drupal_visitor_phone'];
+        }
+        
+        // unset options for State and district in fields age group and performance plan
+        if (variable_get('tenuto_district') == 'State') {
+            $pattern = '/^(?!Colleg.*$).*/';  // anything but Colleg
+            $form['line_item_fields']['field_level']['und']['#default_value'] = 'Collegiate Piano';
+        } else {
+            $pattern = '/^Colleg.*$/';  // matches College and Collegiate
+        };
+        
+        $subjects = $form['line_item_fields']['field_level']['und']['#options'];
+        foreach ($subjects as $key => $subject) {
+            if (preg_match($pattern, $subject) && $key!='_none'){
+                unset($form['line_item_fields']['field_level']['und']['#options'][$key]);
+            }
+        }
+        
+        $subjects = $form['line_item_fields']['field_age_group']['und']['#options'];
+        foreach ($subjects as $key => $subject) {
+            if (preg_match($pattern, $subject) && $key!='_none'){
+                unset($form['line_item_fields']['field_age_group']['und']['#options'][$key]);
+            }
+        }
+
+        
+        // Save cookie once form has been submitted and 'input' is not empty
+        if (!empty($form_state['input'])) {
+            $teacher_name = $form_state['input']['line_item_fields']['field_teacher_name'][LANGUAGE_NONE][0]['value'];
+            if (!empty($teacher_name)) {
+                user_cookie_save(array('name'=>$teacher_name));
+            }   
+            $teacher_email = $form_state['input']['line_item_fields']['field_teacher_email'][LANGUAGE_NONE][0]['email'];
+            if (!empty($teacher_email)) {
+                user_cookie_save(array('email'=>$teacher_email));
+            }
+            $teacher_phone = $form_state['input']['line_item_fields']['field_teacher_phone'][LANGUAGE_NONE][0]['value'];
+            if (!empty($teacher_phone)) {
+                user_cookie_save(array('phone'=>$teacher_phone));
+            }
+   
+        }
+    }
+}

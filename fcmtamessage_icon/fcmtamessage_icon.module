@@ -1,0 +1,26 @@
+<?php
+/*
+ * Implements hook_node_insert().
+ * Turns on icon marker for unread messages
+ */
+
+
+function fcmtamessage_icon_node_insert($node) {
+  switch($node->type) {
+    case 'message_board':
+      global $user;
+      $original_user = $user;
+      drupal_save_session(FALSE);
+      $user = user_load(1);
+      $users_array = entity_load('user');
+      unset($users_array[0]);
+      foreach ($users_array as $u) {
+        $wrapper = entity_metadata_wrapper('user', $u);
+        $wrapper->field_inbox->set(TRUE);
+        $wrapper->save();
+      }
+      $user = $original_user;
+      drupal_save_session(TRUE);
+      break;
+  }
+}
