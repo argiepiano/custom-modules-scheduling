@@ -1,16 +1,19 @@
 <?php
-
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function trigger_recalculate_time_form_views_form_time_slots_rearrange_time_slots_alter (&$form, &$form_state, $form_id) {
   $form['#submit'][] = 'trigger_recalculation_callback';
  
 }
 
+/**
+ * Callback to trigger recalculation of the Time Block
+ */
 function trigger_recalculation_callback($form, &$form_state) {
-  
   $pieces = explode('/', current_path());
   $time_block_nid = end($pieces);
   if (is_numeric($time_block_nid)) {
     recalculate_time_block_recalculate($time_block_nid);
   }
-  
 }
