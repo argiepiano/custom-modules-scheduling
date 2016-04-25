@@ -1,0 +1,4 @@
+name = Preselect member profile
+description = Preselect member profile in concerto registration form
+package = Custom
+core = 7.x

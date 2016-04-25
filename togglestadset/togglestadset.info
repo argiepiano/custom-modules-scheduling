@@ -1,0 +1,4 @@
+name = Toggle fieldset for PF
+description = Shows or hides the administrator fieldset in PF application
+package = Custom
+core = 7.x

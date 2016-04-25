@@ -1,7 +1,0 @@
-name = FCMTA Privatemsg Email Notification
-description = Notifies FCMTA users about new Private Messages via Email.
-package = Custom
-core = 7.x
-dependencies[] = privatemsg
-files[]=fcmtapm_email_notify.module
-configure=admin/config/messaging/privatemsg/notify

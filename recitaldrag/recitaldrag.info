@@ -1,0 +1,4 @@
+name = Recital drag
+description = Reorder recital entityform submissions using a weight field (field_order).
+package = Custom
+core = 7.x

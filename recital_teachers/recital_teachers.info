@@ -1,0 +1,4 @@
+name = Recital teachers
+info = Creates a list of teachers in a recital and inserts it in the footer of the view
+core = 7.x
+package = Custom

@@ -1,0 +1,13 @@
+<?php
+
+/*
+ *   Implements hook_form_ID_alter().
+ */
+ 
+ function togglestadset_form_piano_festival_registration_entityform_edit_form_alter(&$form, &$form_state) {
+    
+   if (!(user_access('edit any entityform'))) {
+     field_group_hide_field_groups($form, array('group_scheduling'));
+   }
+ }
+ 

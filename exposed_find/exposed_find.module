@@ -1,0 +1,35 @@
+<?php
+
+/** implements hook_block_info() **/
+function exposed_find_block_info(){
+  $blocks = array();
+  $blocks['custom_exposed_filter_form'] = array(
+    'info' => t('Exposed filter form'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/** implements hook_block_view() **/
+function exposed_find_block_view($delta = ''){
+  $block = array();
+  switch($delta){
+    case 'custom_exposed_filter_form':
+      $block['subject'] = t('Exposed filter form');
+      $block['content'] = _test_get_exposed_filter_form();   
+    break;
+  }
+  return $block;
+}
+
+/** Function to get the Exposed filter form **/
+function _test_get_exposed_filter_form(){
+  // Get a view from the database or from default views . "test" is the view name.
+  $view = views_get_view('find_a_teacher');
+  // Set the display as current.
+  $view->set_display('page_2');
+  // Acquire and attach all of the handlers to the view.
+  $view->init_handlers();
+  $exposed_form = $view->display_handler->get_plugin('exposed_form');
+  return $exposed_form->render_exposed_form();
+}

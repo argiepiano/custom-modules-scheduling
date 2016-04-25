@@ -1,0 +1,31 @@
+<?php
+
+/*
+ * Implements hook_form_alter().
+ */
+
+function preselect_member_form_alter(&$form, &$form_state, $form_id) {
+    
+    switch ($form_id) {
+        case 'stad_registration_entityform_edit_form':
+        case 'student_recital_registration_entityform_edit_form':
+        case 'piano_festival_registration_entityform_edit_form':
+        case 'perform_a_thon_entityform_edit_form':
+            if ($form_id == 'stad_registration_entityform_edit_form') {
+              $form['#attached']['js'] = array(drupal_get_path('module', 'preselect_member') . '/js/calculatetotal.js'); 
+            }  
+//          drupal_add_js(drupal_get_path('module', 'preselect_member') . '/js/calculatetotal.js');
+            if (!isset($form_state['build_info']['args'][0]->field_teacher)) {
+                global $user;
+                if (user_is_logged_in()) {
+                    $u = user_load($user->uid);
+                    $form['field_teacher'][LANGUAGE_NONE]['#default_value'] = $user->uid;
+                    $form['field_email'][LANGUAGE_NONE][0]['email']['#default_value'] = $user->mail;
+                    if (isset($u->field_member_phone[LANGUAGE_NONE][0]['value'])) {
+                      $form['field_phone'][LANGUAGE_NONE][0]['value']['#default_value'] =  $u->field_member_phone[LANGUAGE_NONE][0]['value'];
+                    }                 
+                }
+            }
+            break;
+    }
+}

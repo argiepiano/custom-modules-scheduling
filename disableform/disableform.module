@@ -1,0 +1,14 @@
+<?php
+
+function disableform_form_student_recital_registration_entityform_edit_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form_state['build_info']['args'][0]->field_event['und'][0]['target_id']) && !(user_access('edit any entityform'))) {
+    $node = node_load($form_state['build_info']['args'][0]->field_event['und'][0]['target_id']);
+    if ($node->field_disable_registration[LANGUAGE_NONE][0]['value']) {
+     if(strtotime('now')>strtotime($node->field_deadline['und'][0]['value'])) {
+       drupal_set_message('The form you are trying to access has been disabled after the deadline', 'error');
+       $dest = drupal_get_destination();
+       drupal_goto($dest);
+      }
+    }
+  }
+}

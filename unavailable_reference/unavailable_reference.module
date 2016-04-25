@@ -1,0 +1,38 @@
+<?php
+/* 
+* Implements hook_form_FORM_ID_alter().
+*/
+
+
+function unavailable_reference_form_views_form_alter(&$form, &$form_state, $form_id) {
+  if (!isset($form['entityreference_view_widget'])) {
+    return;
+  }
+  
+
+  // get the view first
+  $results = views_get_view_result('recital_entity_selection', 'entityreference_view_widget_1');
+
+  // iterate through view results
+  foreach ($results as $key => $result) {
+     // compare max performers with current number of performers
+    if (isset($result->field_field_number_of_players[0]['raw']['value']) && isset($result->field_field_maximum_performers[0]['raw']['value'])) {
+      $max_performers =  $result->field_field_maximum_performers[0]['raw']['value'];
+      $current_performers =  $result->field_field_number_of_players[0]['raw']['value'];
+      if ($current_performers >= $max_performers) {
+        $form['entityreference_view_widget'][$key]['#access'] = FALSE;
+      } 
+    }
+
+    // compare current duration to max time
+    if (isset($result->field_field_maximum_time[0]['raw']['value']) && isset($result->field_field_total_duration[0]['raw']['value'])) {
+      $max_time =  $result->field_field_maximum_time[0]['raw']['value'];
+      $current_time =  $result->field_field_total_duration[0]['raw']['value'];
+      if ($current_time >= $max_time) {
+        $form['entityreference_view_widget'][$key]['#access'] = FALSE;
+      } 
+    }    
+  }
+ 
+  
+}

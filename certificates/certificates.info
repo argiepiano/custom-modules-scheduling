@@ -1,0 +1,4 @@
+name = FCMTA certificate mpdf object alter
+description = Alters the mPDF object to include the certificate background template
+core = 7.x
+package = Custom

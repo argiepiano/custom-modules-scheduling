@@ -1,0 +1,22 @@
+<?php
+
+/*
+* Creates a list of Recital teachers added to the footer of the Recital program 
+*/
+function recital_teachers_views_pre_render(&$view) {
+    if ($view->name == 'recital_registrations' && $view->current_display == 'page_5') {
+      $teachers = array();
+      foreach ($view->result as $r) {
+         $user_id = $r->field_field_teacher[0]['rendered']['#markup'];
+         $user = user_load($user_id);
+         if (!in_array($user->field_name[LANGUAGE_NONE][0]['value'], $teachers)) {
+           $teachers[] = $user->field_name[LANGUAGE_NONE][0]['value'];
+         }
+      }
+      sort($teachers);
+      $teacher_list = implode(', ', $teachers);
+      $view->footer['area']->options['content'] = '<strong>Teachers: </strong>' . $teacher_list;
+
+    }
+    
+}

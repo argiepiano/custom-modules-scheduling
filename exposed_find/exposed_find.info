@@ -1,0 +1,4 @@
+name = Exposed find a teacher form block
+description = Creates a block with an exposed form for find a teacher directory
+core = 7.x
+package = Custom

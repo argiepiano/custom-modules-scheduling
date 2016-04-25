@@ -1,0 +1,4 @@
+name = Unavailable reference widget
+description = Makes specific lines in the recital entity reference widget unavailable
+core = 7.x
+package = Custom

@@ -1,0 +1,9 @@
+<?php
+
+function certificates_print_pdf_mpdf_alter (&$mpdf, $html, $meta) {
+    $mpdf->SetImportUse(); 
+    $mpdf->SetDocTemplate(drupal_get_path('module', 'certificates') . '/files/A-Day-Student-Certificate-4.pdf',true); 
+    
+}
+
+

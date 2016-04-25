@@ -1,0 +1,47 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ *
+ * We'll let drupal_get_form() generate the form page for us, for both of
+ * these menu items.
+ *
+ * @see drupal_get_form()
+ */
+function recitaldrag_menu() {
+  // Basic example with single-depth sorting.
+  $items['admin/recitaldrag/%'] = array(
+    'title' => 'Rearrange recital performers',
+    'description' => 'Show a page of performers with a sortable tabledrag form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('recitaldrag_simple_form', 2),
+    'access arguments' => array('edit any entityform'),
+    'type' => MENU_CALLBACK,
+    'file' => 'recitaldrag_simple_form.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * We need run our forms through custom theme functions in order to build the
+ * table structure which is required by tabledrag.js.  Before we can use our
+ * custom theme functions, we need to implement hook_theme in order to register
+ * them with Drupal.
+ *
+ * We are defining our theme hooks with the same name as the form generation
+ * function so that Drupal automatically calls our theming function when the
+ * form is displayed.
+ */
+function recitaldrag_theme() {
+  return array(
+    // Theme function for the 'simple' example.
+    'recitaldrag_simple_form' => array(
+      'render element' => 'form',
+      'file' => 'recitaldrag_simple_form.inc',
+    ),
+  );
+}
