@@ -41,69 +41,69 @@ function recalculate_time_block_recalculate($tb_id){
   $tblength_of_slots = $tb_wrapper->field_length_of_slots->value(); // in seconds
   $tbstarting_time = $tb_wrapper->field_starting_time->value->value(); // timestamp
   $tbending_time = $tb_wrapper->field_starting_time->value2->value(); // timestap
-  
+  $current_time = $tbstarting_time;
+  $student_count = 0;
+  $tb_wrapper->field_full_class_switch->set('tb-not-full');
+ 
   // Retrieve all Time Slots referencing this Time Block  
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
   ->entityCondition('bundle', 'time_slot')
   ->fieldCondition('field_ref_block', 'target_id', $tb_id);
   $result = $query->execute(); 
-  $nodes = $result['node'];
-  // dpm($nodes);
   
-  // Retrieve Time Slot node ids sorted by their weights
-  $nids = array_keys($nodes);
-  $result = db_query("SELECT entity_id, weight  FROM {weight_weights} WHERE entity_id IN (:nids)  ORDER BY weight ASC", array(':nids'=> $nids))->fetchAll();
-  // dpm($result);
-
-  // Iterate through the sorted array containing Time Slot ids sorted by weight, calculate starting time and add buffer time
-  $current_time = $tbstarting_time;
-  $student_count = 0;
-  $tb_wrapper->field_full_class_switch->set('tb-not-full');
-  foreach ($result as $key=>$item) {
-    // dpm($item->entity_id);
-    $ts_wrapper = entity_metadata_wrapper('node', node_load($item->entity_id));
-    // Determine the length of slots
-    if ($tbfixed_slots) {
-      $slot_length = $tblength_of_slots;
-    } else {
-      $slot_length = $ts_wrapper->field_total_length->value();
+  if (!empty($result)) {
+    $nodes = $result['node'];  
+    // Retrieve Time Slot node ids sorted by their weights
+    $nids = array_keys($nodes);
+    $result = db_query("SELECT entity_id, weight  FROM {weight_weights} WHERE entity_id IN (:nids)  ORDER BY weight ASC", array(':nids'=> $nids))->fetchAll();
+    // Length for fixed slots
+    $slot_length = $tblength_of_slots;
+  
+    // Iterate through the sorted array containing Time Slot ids sorted by weight, calculate starting time and add buffer time
+    foreach ($result as $key=>$item) {
+      $ts_wrapper = entity_metadata_wrapper('node', node_load($item->entity_id));
+      // Determine the length of slots for flexible slots
+      if (!$tbfixed_slots) {
+        $slot_length = $ts_wrapper->field_total_length->value();
+      }
+      // Check for full Time Block
+      if ($tbending_time < $current_time + $slot_length) // Time Block full
+      {
+        $tb_wrapper->field_full_class_switch->set('tb-full');
+        break;
+      }
+      // Set starting time for time slot
+      $ts_wrapper->field_starting_date_and_time->set($current_time);
+      $current_time += $slot_length; 
+      // Set ending time for time slot and save
+      $ts_wrapper->field_end_date_and_time->set($current_time);
+      // Increment the student counter for this Time Block if this is really a student
+      if (!empty($ts_wrapper->field_ref_student->value())) {
+        $student_count++;
+      }
+      
+      $ts_wrapper->save();
+      
+      // Unset this time slot from the looped array
+      unset($result[$key]);
+      // Add buffer time to current time
+      $current_time += $tbbuffer_time;
     }
-    // Check for full Time Block
-    if ($tbending_time < $current_time + $slot_length) // Time Block full
-    {
-      $tb_wrapper->field_full_class_switch->set('tb-full');
-      break;
+  
+    // If there are any time slots that didn't fit in the time block, delete them
+    $deleted_nodes = array();
+    foreach ($result as $key=>$item){
+      $ts_wrapper = entity_metadata_wrapper('node', node_load($item->entity_id));
+      $deleted_nodes[] = $ts_wrapper->field_student_name->value(); 
+      node_delete($item->entity_id);
     }
-    // Set starting time for time slot
-    $ts_wrapper->field_starting_date_and_time->set($current_time);
-    $current_time += $slot_length; 
-    // Set ending time for time slot and save
-    $ts_wrapper->field_end_date_and_time->set($current_time);
-    // Increment the student counter for this Time Block if this is really a student
-    if (!empty($ts_wrapper->field_ref_student->value())) {
-      $student_count++;
+    $deleted_nodes = implode(', ', $deleted_nodes);
+    if ($deleted_nodes) {
+      drupal_set_message('The following students did not fit in this Time Block and have been removed: '. $deleted_nodes, 'warning');
     }
-    
-    $ts_wrapper->save();
-    
-    // Unset this time slot from the looped array
-    unset($result[$key]);
-    // Add buffer time to current time
-    $current_time += $tbbuffer_time;
   }
-
-  // If there are any time slots that didn't fit in the time block, delete them
-  $deleted_nodes = array();
-  foreach ($result as $key=>$item){
-    $ts_wrapper = entity_metadata_wrapper('node', node_load($item->entity_id));
-    $deleted_nodes[] = $ts_wrapper->field_student_name->value(); 
-    node_delete($item->entity_id);
-  }
-  $deleted_nodes = implode(', ', $deleted_nodes);
-  if ($deleted_nodes) {
-    drupal_set_message('The following students did not fit in this Time Block and have been removed: '. $deleted_nodes, 'warning');
-  }
+  
   // Update current time in queue for Time Block and save it
   $tb_wrapper->field_contestant_number->set($student_count);
   $tb_wrapper->field_current_time_in_queue->set($current_time);

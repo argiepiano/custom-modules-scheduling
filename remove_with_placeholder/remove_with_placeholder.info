@@ -1,0 +1,4 @@
+name = Remove with placeholder
+description = Removes a Time Slot and replaces it with a placeholder
+core = 7.x
+package = Custom

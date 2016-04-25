@@ -1,0 +1,96 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+
+function remove_with_placeholder_menu() {
+  $items['admin/placeholder/%node'] = array(
+    'page callback' => 'remove_with_placeholder',
+    'page arguments' => array(2),
+    'access arguments' => array('administer nodes'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Loads the form or executes the remove action
+ * 
+ * @param $node
+ *  The node object on which the action is performed
+ */ 
+function remove_with_placeholder($node) {
+  if (!$node->field_ref_student){
+    // simply delete node and recalculate 
+    $w = entity_metadata_wrapper('node', $node);
+    $tb_id = $w->field_ref_block->nid->value(); 
+    node_delete($w->nid->value());
+    recalculate_time_block_recalculate($tb_id);
+    drupal_goto('admin/students/time-block-display/'.$tb_id);
+  }
+  drupal_set_title('Remove '. $node->field_student_name[LANGUAGE_NONE][0]['value']);
+  return drupal_get_form('remove_with_placeholder_form', $node);
+}
+
+function remove_with_placeholder_form($form, &$form_state, $node) {
+  $form_state['node'] = $node;
+  $w = entity_metadata_wrapper('node', $node);
+
+//  $form['#attached']['library'][] = array('system', 'drupal.ajax');
+  $form['student_name'] = array(
+    '#type' => 'item',
+    '#markup' => 'Do you want to remove '.$w->field_student_name->value().'?',
+  );
+  $form['placeholder'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace with a placeholder'),
+    '#description' => t('Check this box if you would like to replace this student with a placeholder to hold the student\'s original times.'),
+  );
+ $form['submit'] = array(
+  '#type' => 'submit',
+  '#value' => 'Remove',
+  '#ajax' => array(
+    'callback' => 'remove_dialog_close',)
+  );
+ return $form;
+}
+
+/**
+ * Ajax submit handler
+ */
+
+function remove_dialog_close($form, &$form_state) {
+  $commands = array(
+   '#type' => 'ajax',
+   '#commands' => array(),
+ );
+  // $commands['#commands'][] = dialog_command_close_modal_dialog();
+  $commands['#commands'][] = dialog_command_reload();
+ return $commands;
+}
+ 
+/**
+ * Form submit handler
+ */
+
+function remove_with_placeholder_form_submit($form, &$form_state){
+  $w = entity_metadata_wrapper('node', $form_state['node']);
+  if ($form_state['values']['placeholder']){
+    $w->title->set('Placeholder');
+    $w->field_ref_student->set(NULL);
+    $w->field_student_name->set('Placeholder');
+    $w->field_contestant_number->set(0);
+    $w->field_total_length->set($w->field_trimmed_length->value());
+    $w->field_ref_block->field_contestant_number->set(($w->field_ref_block->field_contestant_number->value())-1);
+    $w->field_ref_block->save();
+    $w->save();
+  } else {
+    $tb_id = $w->field_ref_block->nid->value(); 
+    node_delete($w->nid->value());
+    recalculate_time_block_recalculate($tb_id);
+  }
+  // $form_state['redirect'] = 'admin/students/time-block-display/'.$w->field_ref_block->nid->value();
+}
+
+

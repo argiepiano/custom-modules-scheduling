@@ -16,7 +16,7 @@
 	  $( this )
 	    .addClass( "ui-state-highlight" )
 	  $(ui.draggable).hide();
-	  $('<img src="' + Drupal.settings.basePath + Drupal.settings.draggy.draggyPath + '/progress.gif" style="width:auto;height:auto;position:absolute;left: 50%;top:70%;" />').appendTo("body");
+	  $('<img src="' + Drupal.settings.basePath + Drupal.settings.draggy.draggyPath + '/progress.gif" style="width:auto;height:auto;position:fixed;left: 50%;top:50%;" />').appendTo("body");
 	  var href = "/draggy/" + callback1 + "/" + callback2 + "?destination=" + pathname;
 	  window.location.href = href;
 	}
