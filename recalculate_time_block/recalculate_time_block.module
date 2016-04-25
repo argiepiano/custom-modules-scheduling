@@ -79,7 +79,8 @@ function recalculate_time_block_recalculate($tb_id){
       // Set ending time for time slot and save
       $ts_wrapper->field_end_date_and_time->set($current_time);
       // Increment the student counter for this Time Block if this is really a student
-      if (!empty($ts_wrapper->field_ref_student->value())) {
+      $emptycheck=$ts_wrapper->field_ref_student->value();
+      if (!empty($emptycheck)) {
         $student_count++;
       }
       
