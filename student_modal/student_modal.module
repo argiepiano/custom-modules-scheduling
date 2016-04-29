@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function student_modal_menu(){
+  $items['admin/student_modal/%ctools_js/%'] = array(
+    'page callback' => 'student_modal_show',
+    'page arguments' => array(2, 3),
+    'access arguments' => 'administer line items',
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+/**
+ * Show the content in a modal
+ *
+ * @param $ajax
+ *    Flag for JavaScript enabled browser
+ * @param $id
+ *    Id of the student (which is in fact the Line Item ID) 
+ */
+
+function student_modal_show($ajax, $id){
+    $v = views_embed_view('line_items_for_admin','page_3', $id);
+    if ($ajax) {
+      ctools_include('ajax');
+      ctools_include('modal');
+      if (empty($v)) {
+        return 'Error';
+      }
+      return ctools_modal_render('',$v);
+    } else {
+      return $v; 
+    }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ * 
+ */
+function student_modal_views_pre_render(&$views) {
+  // Make sure it's the correct view
+  if ($views->name == 'time_slots') {
+    // add needed javascript
+    // drupal_add_library('system', 'drupal.ajax');
+
+    ctools_include('modal');
+    ctools_include('ajax');
+    ctools_modal_add_js();
+    drupal_add_js(array(
+      'my-modal-style' => array(
+        'modalSize' => array(
+          'width' => '.5',
+        ),
+        'closeText' => '',
+        'animation' => 'fadeIn',
+        'closeImage' => theme('image', array('path' => ctools_image_path('close-image-small.png', 'student_modal'), 'alt' => t('Close window'), 'title' => t('Close window'))),
+      ),
+    ), 'setting');
+  }
+}

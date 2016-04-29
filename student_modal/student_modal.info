@@ -1,0 +1,4 @@
+name = Student Modal Window
+description = shows a CTools modal with student information when clicking ID link in the time block
+core = 7.x
+package = Custom

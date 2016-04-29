@@ -1,0 +1,50 @@
+<?php
+
+function tempochoto_menu(){
+  $items['tempochoto'] = array(
+    'page callback' => 'tempochotito',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['tempochoto/show/%ctools_js'] = array (
+    'page callback' => 'tempochoto_show',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+function tempochotito(){
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+  drupal_add_js(array(
+    'my-modal-style' => array(
+      'modalSize' => array(
+        'width' => '.5',
+      ),
+      'closeText' => '',
+      'animation' => 'fadeIn',
+      'closeImage' => theme('image', array('path' => ctools_image_path('close-image-small.png', 'tempochoto'), 'alt' => t('Close window'), 'title' => t('Close window'))),
+    ),
+  ), 'setting');
+  
+  //drupal_add_library('system', 'drupal.ajax');
+  // return '<div id="magical-modal-link">' . l('Click me', 'tempochoto/show/nojs', array('attributes' => array('class' => 'ctools-use-modal'))) . '</div>';
+  $link = ctools_modal_text_button('Click me','tempochoto/show/nojs', 'alter','ctools-modal-my-modal-style');
+  return  $link;
+}
+
+function tempochoto_show($ajax){
+    if ($ajax) {
+      ctools_include('ajax');
+      ctools_include('modal');
+      $v = views_embed_view('line_items_for_admin','page_3', 2);
+      //$n = node_load(1071);
+      //$v = node_view($n);
+      // drupal_add_library('system', 'drupal.ajax');
+      return ctools_modal_render('',$v);
+      // return $v;
+    }
+}

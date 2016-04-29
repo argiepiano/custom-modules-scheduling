@@ -1,0 +1,4 @@
+name = Add color swatches to Time Block edit
+description = Adds a view of used colors in the Time Block edit/create form
+core = 7.x
+package = Custom

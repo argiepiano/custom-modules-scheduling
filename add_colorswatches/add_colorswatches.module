@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+
+function add_colorswatches_form_time_block_node_form_alter(&$form, $form_state, $form_id) {
+  $form['used_colors'] = array(
+    '#markup' => '<h3>Previously used colors</h3>' . views_embed_view('time_blocks_2', 'page_1'),
+    '#weight' => 20,
+  );
+  $form['#attached']['js'][] = drupal_get_path('module','add_colorswatches') . '/add_colorswatches.js';
+}
+
+//function add_colorswatches_views_pre_render(&$view){
+//  if ($view->name == 'time_blocks_2') {
+//    dpm($view->field);
+//  }
+//}
