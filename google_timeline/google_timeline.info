@@ -1,0 +1,4 @@
+name = Google Timeline
+description = Draws a Google Timeline
+core = 7.x
+package = Custom

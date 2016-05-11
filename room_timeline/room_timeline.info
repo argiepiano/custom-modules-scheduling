@@ -1,0 +1,4 @@
+name = Room Timeline
+description = Draws a Google Timeline for Rooms
+core = 7.x
+package = Custom

@@ -1,0 +1,200 @@
+<?php
+
+/**
+ * @file
+ * Functions and hooks to check for judge time conflicts and to notify the users.
+ * Creates a dismissable, persistent warning
+ *
+ */
+
+/**
+ * Implements hook_menu().
+ */ 
+function judge_conflict_menu() {
+  $items = array();
+  $items['admin/judge-conflict-dismiss'] = array(
+    'page callback' => 'judge_conflict_dismiss_message',
+//    'page arguments' => array(2),
+    'access arguments' => array('administer content'),
+    'type' => MENU_CALLBACK,
+//    'delivery callback' => 'ajax_deliver',
+  );
+  
+  $items['admin/judge-conflicts'] = array(
+    'page callback' => 'judge_conflict_page',
+    'access arguments' => array('administer content'),
+    'type' => MENU_CALLBACK,
+  );
+ return $items;
+}
+
+/**
+ * Shows a list of judges with conflicts
+ */
+
+function judge_conflict_page() {
+  drupal_set_title('Judges with time conflicts');
+  $judge_nids = variable_get('conflicting_judges');
+  $output = 'No conflicts found';
+  if (!empty($judge_nids)) {
+    $judges = node_load_multiple($judge_nids);
+    $output = node_view_multiple($judges, 'teaser');
+    $path = drupal_get_path('module', 'room_timeline');
+  }
+  return $output;  
+}
+
+/**
+ * Dismisses judge conflict warning
+ */
+
+function judge_conflict_dismiss_message(){
+  variable_set('judge_conflict_warning', FALSE);
+  drupal_goto();
+}
+
+/**
+ * Implements hook_page_alter().
+ * This is used to show the persistent warning
+ */
+
+function judge_conflict_page_alter(&$page){
+  if (path_is_admin(current_path())) {
+    if (variable_get('judge_conflict_warning', FALSE)){
+      $dest = current_path();
+      $dismiss_link = '<div class="dismiss-link">'. l('Dismiss','admin/judge-conflict-dismiss',
+                            array('query' => array('destination' => $dest))) .'</div>';
+      drupal_set_message(t('Judge time conflict detected. To review conflicts !url.',
+                          array('!url' => l('click here', '/admin/judge-conflicts'))). $dismiss_link, 'warning');
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ * This turns on the flag for postsave checking for conflicts
+ */
+
+function judge_conflict_node_presave($node){
+  switch($node->type) {
+    case 'judge':
+      variable_set('check_judge_conflict_flag', TRUE);
+      break;
+    case 'time_block':
+      if ($node->field_assigned_judges !== $node->original->field_assigned_judges || $node->field_starting_time !== $node->original->field_starting_time) {
+        variable_set('check_judge_conflict_flag', TRUE);
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_node_postsave().
+ *
+ * Triggers the conflict checking
+ */
+
+function judge_conflict_node_postsave($node, $op){
+  if (($node->type == 'judge' || $node->type == 'time_block') && variable_get('check_judge_conflict_flag') && ($op == 'insert' || $op == 'update')) {
+    switch ($node->type) {
+      case 'judge':
+        variable_set('check_judge_conflict_flag', FALSE);
+        _judge_conflict_helper($node);
+        break;
+      case 'time_block':
+        variable_set('check_judge_conflict_flag', FALSE);
+        $tb_wrapper = entity_metadata_wrapper('node', $node);
+        foreach ($tb_wrapper->field_assigned_judges->getIterator() as $judge_wrapper) {
+          $judge = $judge_wrapper->value();
+          _judge_conflict_helper($judge);
+        }
+        break;
+    }
+  }
+}
+
+function _judge_conflict_helper($node) {
+  $conflicting_judges = variable_get('conflicting_judges', array());
+  $tb_nids = judge_conflict_check($node->nid);
+  if(!empty($tb_nids)){
+    // Conflict found
+    watchdog('postsave' , 'found judge conflict');
+    variable_set('judge_conflict_warning', TRUE);
+    if (!in_array($node->nid, $conflicting_judges)){
+      // This judge was not in the conflicting list. Add it
+      $conflicting_judges[] = $node->nid;
+      variable_set('conflicting_judges', $conflicting_judges);
+    }
+  } else {
+    // No conflict found
+    if (!empty($conflicting_judges) && in_array($node->nid, $conflicting_judges)) {
+      // This judge is in the list. Delete it.
+      $key = array_search($node->nid, $conflicting_judges);
+      unset($conflicting_judges[$key]);
+      array_values($conflicting_judges);
+      variable_set('conflicting_judges', $conflicting_judges);
+      if (empty($conflicting_judges)) {
+        variable_set('judge_conflict_warning', FALSE);
+      }
+    }
+  }
+}
+
+
+/**
+ * Checks time conflicts for a specific judge in all defined Time Blocks
+ *
+ * @param $judge
+ *  The Judge node to be checked
+ *
+ * @return array
+ *  An array containing Time Block nids where conflict was detected
+ *
+ */
+function judge_conflict_check($judge) {
+  $conflicting_time_blocks = array();
+  $judge_wrapper = entity_metadata_wrapper('node', $judge);
+  $av_time_count = count($judge_wrapper->field_available_times->value());
+  if ($av_time_count == 0) {
+    return array('');
+  }
+  // Loop through available times and build array of times
+  $judge_available_times = array();
+  for ($i = 0; $i < $av_time_count; $i++) {
+    $judge_available_times[$i]['start'] = $judge_wrapper->field_available_times[$i]->value->value();
+    $judge_available_times[$i]['end'] = $judge_wrapper->field_available_times[$i]->value2->value();
+  }
+  // Loop through each of the Time Block assigned to this judge and build array of times
+  $time_block_times = array();
+  foreach($judge_wrapper->field_assigned_blocks->getIterator() as $delta => $time_block_wrapper) {
+    $time_block_times[$delta]['nid'] = $time_block_wrapper->nid->value();
+    $time_block_times[$delta]['start'] = $time_block_wrapper->field_starting_time->value->value();
+    $time_block_times[$delta]['end'] = $time_block_wrapper->field_starting_time->value2->value();
+    
+  }
+
+  // First check that all assigned times fall within at least one of the available times
+  foreach ($time_block_times as $assigned_time){
+    $correct_interval = FALSE;
+    foreach ($judge_available_times as $judge_available_time) {
+      if ($judge_available_time['start'] <= $assigned_time['start'] && $judge_available_time['end'] >= $assigned_time['end']) {
+        $correct_interval = TRUE;
+      }
+    }
+    if (!$correct_interval) {
+      $conflicting_time_blocks[] = $assigned_time['nid'];
+    }
+  }
+  
+  // Then check that there are no overlapping time blocks
+  $tb_count = count($time_block_times);
+  foreach($time_block_times as $delta => $assigned_time) {
+    for ($i = $delta+1; $i<$tb_count; $i++) {
+      // Check for overlapping
+      if ($assigned_time['start']<$time_block_times[$i]['end'] && $assigned_time['end']>$time_block_times[$i]['start']){
+        $conflicting_time_blocks[] = $assigned_time['nid'];
+      }
+    }
+  }
+  return $conflicting_time_blocks;
+}

@@ -1,0 +1,81 @@
+<?php
+
+function google_timeline_menu(){
+  $items['admin/google-timeline'] = array(
+    'page callback' => 'google_timeline_page',
+    'access callback' => TRUE,
+    'title' => 'Google Timeline',
+  );
+  
+  return $items;
+  
+}
+
+function google_timeline_page(){
+ // drupal_add_css(drupal_get_path('module', 'google_chart_tools') . '/google_chart_tools.css');
+  drupal_add_js("https://www.gstatic.com/charts/loader.js", 'external');
+  drupal_add_js(drupal_get_path('module', 'google_timeline') . '/google_timeline.js');
+  $columns[] = array(
+    'type' => 'string',
+    'id' => 'Row label',
+  );
+  
+  $columns[] = array(
+    'type' => 'string',
+    'id' => 'Bar label',
+  );
+  
+  $columns[] = array(
+    'type' => 'date',
+    'id' => 'Start',
+  );
+
+  $columns[] = array(
+    'type' => 'date',
+    'id' => 'End',
+  );
+  
+  $options = array(
+    'colors' => array('#c1269d', '#403913', '#c6006e','#cccccc'),
+  );
+  
+  $rows[] = array(
+    'row_label' => 'Grusin',
+    'bar_label' => 'Advanced',
+    'start' => strtotime('2016-05-01T09:15')*1000,
+    'end' =>strtotime('2016-05-01T10:30')*1000,
+  );
+  
+  $rows[] = array(
+    'row_label' => 'C199',
+    'bar_label' => 'Advanced',
+    'start' => strtotime('2016-05-01T09:00')*1000,
+    'end' =>strtotime('2016-05-01T10:00')*1000,
+  );
+
+  $rows[] = array(
+    'row_label' => 'C199',
+    'bar_label' => 'Elementary',
+    'start' => strtotime('2016-05-01T10:00')*1000,
+    'end' =>strtotime('2016-05-01T11:00')*1000,
+  );
+  $rows[] = array(
+    'row_label' => 'C125',
+    'bar_label' => 'Intermediate',
+    'start' => strtotime('2016-05-01T09:00')*1000,
+    'end' =>strtotime('2016-05-01T10:00')*1000,
+  );  
+  
+  
+  $settings = array(
+      'columns' => $columns,
+      'options' => $options,
+      'rows' => $rows,
+  ); 
+  drupal_add_js(array(
+      'google_timeline'=>$settings
+    ),'setting');
+
+
+  return '<p>Example timeline:</p><div id="timeline" class="timeline"></div>';
+}

@@ -1,0 +1,4 @@
+name = Judge timeline
+description = Creates a timeline of time blocks and available times
+core = 7.x
+package = Custom

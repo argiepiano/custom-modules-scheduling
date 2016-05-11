@@ -1,0 +1,80 @@
+<?php
+
+
+/**
+ * Implements hook_node_view_alter().
+ *
+ */
+
+function judge_timeline_node_view_alter(&$build) {
+  if ($build['#node']->type == 'judge') {
+    //drupal_add_css(drupal_get_path('module', 'room_timeline') . '/room_timeline.css');
+    //drupal_add_js("https://www.gstatic.com/charts/loader.js", 'external');
+    //drupal_add_js(drupal_get_path('module', 'room_timeline') . '/room_timeline.js');
+    $columns = array();
+    $columns[] = array(
+      'type' => 'string',
+      'id' => 'Row label',
+    );
+    $columns[] = array(
+      'type' => 'string',
+      'id' => 'Bar label',
+    );
+    $columns[] = array(
+      'type' => 'date',
+      'id' => 'Start',
+    );
+    $columns[] = array(
+      'type' => 'date',
+      'id' => 'End',
+    );
+    
+    $node_wrapper = entity_metadata_wrapper('node', $build['#node']);
+    $rows = array();
+    foreach ($node_wrapper->field_available_times->getIterator() as $delta => $time_wrapper){
+      $rows[] = array(
+        'row_label' => 'Timeline',
+        'bar_label' => 'Available time',
+        'start' => $time_wrapper->value->value() * 1000,
+        'end' => $time_wrapper->value2->value() * 1000,
+      );
+    }
+    
+    foreach ($node_wrapper->field_assigned_blocks->getIterator() as $delta => $tb_wrapper){
+      $rows[] = array(
+        'row_label' => 'Timeline',
+        'bar_label' => $tb_wrapper->title->value() . '. Room: ' . $tb_wrapper->field_room->name->value(),
+        'start' => $tb_wrapper->field_starting_time->value->value() * 1000,
+        'end' => $tb_wrapper->field_starting_time->value2->value() * 1000,
+      );
+    }
+    $key = 'nid' . $node_wrapper->nid->value();
+    $settings = array(
+      'containerID' => $key,
+      'columns' => $columns,
+//      'options' => $options,
+      'rows' => $rows,
+    );
+    $build['#attached']['js'][] = array(
+      'data' => array (
+        'google_timeline' => array (
+          $key => $settings,
+        )
+      ),
+      'type' => 'setting',
+    );
+  }
+}
+/**
+ * Implements hook_ds_pre_render_alter
+ *
+ * Adds javascript
+ */
+
+function judge_timeline_ds_pre_render_alter(&$layout_render_array, $context, $vars){
+  if ($context['entity_type'] == 'node' && $context['bundle'] == 'judge' && $context['view_mode'] == 'teaser') {
+    drupal_add_css(drupal_get_path('module', 'room_timeline') . '/room_timeline.css');
+    drupal_add_js("https://www.gstatic.com/charts/loader.js", 'external');
+    drupal_add_js(drupal_get_path('module', 'room_timeline') . '/room_timeline.js');
+  }
+}

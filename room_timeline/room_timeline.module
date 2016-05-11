@@ -1,0 +1,99 @@
+<?php
+
+function room_timeline_menu(){
+  $items['admin/students/time-block-grid/timeline'] = array(
+    'page callback' => 'room_timeline_page',
+    'access arguments' => array('administer content'),
+    'title' => 'Room Timeline',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+  
+  return $items;
+  
+}
+
+function room_timeline_page(){
+  drupal_add_css(drupal_get_path('module', 'room_timeline') . '/room_timeline.css');
+  drupal_add_js("https://www.gstatic.com/charts/loader.js", 'external');
+  drupal_add_js(drupal_get_path('module', 'room_timeline') . '/room_timeline.js');
+  $columns[] = array(
+    'type' => 'string',
+    'id' => 'Row label',
+  );
+  
+  $columns[] = array(
+    'type' => 'string',
+    'id' => 'Bar label',
+  );
+  
+  $columns[] = array(
+    'type' => 'date',
+    'id' => 'Start',
+  );
+
+  $columns[] = array(
+    'type' => 'date',
+    'id' => 'End',
+  );
+  
+  // Get all rooms (taxonomy terms)
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'taxonomy_term')
+  ->entityCondition('bundle', 'rooms');
+  $results = $query->execute();
+  $tids = array_keys($results['taxonomy_term']);
+  $i = 0;
+  $rows = $colors = array();
+  $past_timeblocks = array();
+  
+  // Loop through the room terms to create rows
+  foreach ($tids as $tid) {
+    $term = taxonomy_term_load($tid);
+    // Grab the nodes that reference this room
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle','time_block')
+    ->fieldCondition('field_room','tid', $term->tid)
+    ->fieldOrderBy('field_starting_time', 'value');
+    $results = $query->execute();
+    $nids = array_keys($results['node']);
+    // Loop through the time block nodes to create rows
+    foreach ($nids as $nid) {
+      $node = node_load($nid);
+      $node_wrapper = entity_metadata_wrapper('node', $node);
+      $rows[$i] = array (
+        'row_label' => $term->name,
+        'bar_label' => $node_wrapper->title->value(),
+        'start' => $node_wrapper->field_starting_time->value->value() * 1000,
+        'end' => $node_wrapper->field_starting_time->value2->value() * 1000,
+      );
+      if (!in_array($node_wrapper->title->value(), $past_timeblocks)){
+        if ($node_wrapper->field_time_block_color->value())
+        {
+          $colors[] = $node_wrapper->field_time_block_color->rgb->value();
+        } else {
+          $colors[] = '#e1e2dc';
+        }
+        $past_timeblocks[] = $node_wrapper->title->value();
+      }
+      $i++;
+    }    
+  }
+
+  $options = array(
+    'colors' => $colors,
+  );
+  $settings = array(
+      'containerID' => 'timeline',
+      'columns' => $columns,
+      'options' => $options,
+      'rows' => $rows,
+  ); 
+  drupal_add_js(array(
+      'google_timeline'=>array($settings)
+    ),'setting');
+
+
+  return '<div id="timeline" class="timeline"></div>';
+}

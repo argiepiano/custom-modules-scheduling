@@ -1,0 +1,8 @@
+<?php
+
+function prepare_timeblock_form_time_block_node_form_alter(&$form, &$form_state, $form_id) {
+    if (isset($_REQUEST['edit'])) {
+        $request = (array) $_REQUEST['edit'];
+        $form['field_room']['und']['#default_value'] = check_plain($request['field_room'][LANGUAGE_NONE]);
+    }
+}

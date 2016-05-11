@@ -1,0 +1,5 @@
+name = Prepare time slot 
+description = Prepares Time Slot edit form prepoluating fields
+package = Custom
+core = 7.x
+version = 0.1

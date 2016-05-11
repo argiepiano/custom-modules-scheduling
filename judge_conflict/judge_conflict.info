@@ -1,0 +1,6 @@
+name = Judge Conflict Detector
+description = Detects time conflicts for Judges
+core = 7.x
+dependencies[] = hook_post_action
+package = Custom
+version = 1.1

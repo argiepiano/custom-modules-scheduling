@@ -1,0 +1,22 @@
+<?php
+
+function prepare_timeslot_form_time_slot_node_form_alter(&$form, &$form_state, $form_id) {
+    
+    if (isset($_REQUEST['edit'])) {
+        $request = (array) $_REQUEST['edit'];
+        if ($request['field_student_name'][LANGUAGE_NONE][0]['value'] != 'Break') {
+            $form['#group_children']['field_total_length'] = 'group_hidden_in_form';
+            $form['field_ref_student'][LANGUAGE_NONE]['#default_value'] = check_plain($request['field_ref_student'][LANGUAGE_NONE]);
+            $form['field_trimmed_length']['und'][0]['value']['#default_value'] = check_plain($request['field_trimmed_length']['und'][0]['value']);
+        }
+        else {
+            $form['field_ref_block'][LANGUAGE_NONE]['#default_value'] = check_plain($request['field_ref_block'][LANGUAGE_NONE]);
+        }
+        $form['title']['#default_value'] = $request['title'];
+        $form['field_student_name']['und'][0]['value']['#default_value']= check_plain($request['field_student_name'][LANGUAGE_NONE][0]['value']);
+        $form['field_total_length']['und'][0]['value']['#default_value'] = check_plain($request['field_total_length']['und'][0]['value']);
+    }
+    
+
+
+}

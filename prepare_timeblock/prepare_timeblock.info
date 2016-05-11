@@ -1,0 +1,4 @@
+name = Prepare new Time Block
+description = Prepopulates Time Block with the relationship to the Room term
+core = 7.x
+package = Custom

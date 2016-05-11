@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * @file
+ * Functions and hooks to check for judge time conflicts and to notify the users.
+ * Creates a dismissable, persistent warning
+ *
+ */
+
+/**
+ * Implements hook_menu().
+ */ 
+function judge_conflict_menu() {
+  $items = array();
+  $items['admin/judge-conflict-dismiss'] = array(
+    'page callback' => 'judge_conflict_dismiss_message',
+//    'page arguments' => array(2),
+    'access arguments' => array('administer content'),
+    'type' => MENU_CALLBACK,
+//    'delivery callback' => 'ajax_deliver',
+  );
+ return $items;
+}
+
+/**
+ * Dismisses judge conflict warning
+ */
+
+function judge_conflict_dismiss_message(){
+  variable_set('judge_conflict_warning', FALSE);
+  drupal_goto();
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+
+function judge_conflict_page_alter(&$page){
+  if (path_is_admin(current_path())) {
+    if (variable_get('judge_conflict_warning', FALSE)){
+      $dest = current_path();
+      $dismiss_link = '<div class="dismiss-link">'. l('Dismiss','admin/judge-conflict-dismiss',
+                            array('query' => array('destination' => $dest))) .'</div>';
+      drupal_set_message(t('Judge time conflict deteted. To review conflicts !url.',
+                          array('!url' => l('click here', '/admin/judge-conflicts'))). $dismiss_link, 'warning');
+    }
+  }
+}
+
+function judge_conflict_form_judge_node_form_alter(&$form, &$form_state, $form_id){
+  $form['actions']['submit']['#submit'][] = 'judge_conflict_check_judge_form';
+}
+
+function judge_conflict_check_judge_form($form, &$form_state){
+  dpm($form);
+  dpm($form_state);
+}
+
+/**
+ * Checks time conflicts for a specific judge in all defined Time Blocks
+ *
+ * @param $judge_id
+ *  The nid of the Judge node to be checked
+ *
+ * @return array
+ *  An array containing Time Block nids where conflict was detected
+ *
+ */
+function judge_conflict_check($judge_id) {
+  $judge = node_load($judge_id);
+  $conflicting_time_blocks = array();
+  $judge_wrapper = entity_metadata_wrapper('node', $judge);
+  $av_time_count = count($judge_wrapper->field_available_times->value());
+  if ($av_time_count == 0) {
+    return array('');
+  }
+  // Loop through available times and build array of times
+  $judge_available_times = array();
+  for ($i = 0; $i < $av_time_count; $i++) {
+    $judge_available_times[$i]['start'] = $judge_wrapper->field_available_times[$i]->value->value();
+    $judge_available_times[$i]['end'] = $judge_wrapper->field_available_times[$i]->value2->value();
+  }
+  // Loop through each of the Time Block assigned to this judge and build array of times
+  $time_block_times = array();
+  foreach($judge_wrapper->field_assigned_blocks->getIterator() as $delta => $time_block_wrapper) {
+    $time_block_times[$delta]['nid'] = $time_block_wrapper->nid->value();
+    $time_block_times[$delta]['start'] = $time_block_wrapper->field_starting_time->value->value();
+    $time_block_times[$delta]['end'] = $time_block_wrapper->field_starting_time->value2->value();
+    
+  }
+
+  // First check that all assigned times fall within at least one of the available times
+  foreach ($time_block_times as $assigned_time){
+    $correct_interval = FALSE;
+    foreach ($judge_available_times as $judge_available_time) {
+      if ($judge_available_time['start'] <= $assigned_time['start'] && $judge_available_time['end'] >= $assigned_time['end']) {
+        $correct_interval = TRUE;
+      }
+    }
+    if (!$correct_interval) {
+      $conflicting_time_blocks[] = $assigned_time['nid'];
+    }
+  }
+  
+  // Then check that there are no overlapping time blocks
+  $tb_count = count($time_block_times);
+  foreach($time_block_times as $delta => $assigned_time) {
+    for ($i = $delta+1; $i<$tb_count; $i++) {
+      // Check for overlapping
+      if ($assigned_time['start']<$time_block_times[$i]['end'] && $assigned_time['end']>$time_block_times[$i]['start']){
+        $conflicting_time_blocks[] = $assigned_time['nid'];
+      }
+    }
+  }
+  dpm($conflicting_time_blocks);
+}
